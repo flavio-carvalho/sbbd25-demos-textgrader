@@ -1,6 +1,10 @@
 import json
 import ollama
 
+# This script defines a function to evaluate a student's essay based on a JSON input,
+# using the Ollama API to interact with the Gemma model. It constructs a system prompt
+# and a user prompt, sends them to the model, and returns the evaluation response.  
+
 def avaliar_redacao(json_input: str) -> str:
     """
     Receives a JSON string with 'proposta', 'redacao', and 'notas',
@@ -54,3 +58,20 @@ def avaliar_redacao(json_input: str) -> str:
     )
 
     return response["message"]["content"]
+
+# Exemplo de uso
+if __name__ == "__main__":
+    json_input = json.dumps({
+        "proposta": "A importância da educação ambiental nas escolas.",
+        "redacao": "A educação ambiental é fundamental para formar cidadãos conscientes...",
+        "notas": {
+            "competencia1": 180,
+            "competencia2": 150,
+            "competencia3": 170,
+            "competencia4": 160,
+            "competencia5": 140
+        }
+    })
+    
+    resultado = avaliar_redacao(json_input)
+    print(resultado)
