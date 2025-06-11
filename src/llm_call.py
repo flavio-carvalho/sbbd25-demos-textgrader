@@ -60,16 +60,17 @@ def avaliar_redacao(json_input: str) -> str:
     )
 
     # Monta o user prompt
-    user_prompt = (
+        competencias_str = "\n".join([
+        f"Competência {i+1}: Nota {comp['nota']} | {comp['competencia']}"
+        for i, comp in enumerate(competencias)
+        ])
+
+        user_prompt = (
         f"Tema da redação:\n{tema}\n\n"
         f"Texto da redação:\n{texto}\n\n"
-        f"Notas por competência:\n"
-        f"Competência 1: {competencias['competencia1']}\n"
-        f"Competência 2: {competencias['competencia2']}\n"
-        f"Competência 3: {competencias['competencia3']}\n"
-        f"Competência 4: {competencias['competencia4']}\n"
-        f"Competência 5: {competencias['competencia5']}"
-    )
+        f"Notas por competência:\n{competencias_str}"
+        )
+
 
     # Chamada ao modelo via Ollama
     response = ollama.chat(
