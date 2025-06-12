@@ -20,7 +20,7 @@ def avaliar_redacao(json_input: str) -> str:
 
     # Monta o system prompt com as competências
     competencias_str = "\n".join([
-        f"- **{comp['competencia']}**: Nota {comp['nota']} | Motivo: {comp['motivo']}"
+        f"- **{comp['competencia']}**: Nota {comp['nota']}"
         for comp in competencias_dados
     ])
 
@@ -35,9 +35,14 @@ def avaliar_redacao(json_input: str) -> str:
         "- O tema da redação (proposta e/ou texto motivador).\n\n"
         f"**Competências Avaliadas:**\n{competencias_str}\n\n"
         "Apresente sua resposta no seguinte formato:\n\n"
-        "---\n"
-        "**Competência X** – Nota: [nota atribuída]\n"
-        "[Até 3 sugestões focadas nessa competência, levando em conta o conteúdo da redação, o escopo do tema e a nota recebida]\n"
+        "**Sugestões de Melhoria (uma por competência):**\n"
+        "1. **Competência [V]** (Nota: [nota]): [Sugestão concisa]\n"
+        "2. **Competência [W]** (Nota: [nota]): [Sugestão concisa]\n"
+        "3. **Competência [XX]** (Nota: [nota]): [Sugestão concisa]\n"
+        "4. **Competência [Y]** (Nota: [nota]): [Sugestão concisa]\n"
+        "5. **Competência [Z]** (Nota: [nota]): [Sugestão concisa]\n\n"
+        "Guie-se pelas notas fornecidas e pelo conteúdo do texto para cada sugestão."
+        "[Para cada competência, gere até 3 sugestões focadas nessa competência, levando em conta o conteúdo da redação, o escopo do tema e a nota recebida]\n"
         "---\n\n"
         "Importante: Use o tema da redação para avaliar a pertinência temática e o foco argumentativo do estudante. "
         "Se a proposta de intervenção for vaga, sugira maneiras de conectá-la melhor ao problema central. "
@@ -47,7 +52,7 @@ def avaliar_redacao(json_input: str) -> str:
     # Monta o user prompt
     competencias_str_user = "\n".join([
         f"Competência {i+1}: Nota {comp['nota']} | {comp['competencia']}"
-        for i, comp in enumerate(competencias_)
+        for i, comp in enumerate(competencias_dados)
     ])
 
     user_prompt = (
@@ -80,14 +85,23 @@ if __name__ == "__main__":
         "id": "16178",
         "link": "https://vestibular.brasilescola.uol.com.br/banco-de-redacoes/16178",
         "competencias": [
-            {"competencia": "Domínio da modalidade escrita formal", "nota": "150", "motivo": "Nível 4 - Demonstra bom domínio da modalidade escrita formal da língua portuguesa e de escolha de registro, com poucos desvios gramaticais e de convenções da escrita."},
-            {"competencia": "Compreender a proposta e aplicar conceitos das várias áreas de conhecimento para desenvolver o texto dissertativo-argumentativo em prosa", "nota": "200", "motivo": "Nível 5 - Desenvolve o tema por meio de argumentação consistente, a partir de um repertório sociocultural produtivo e apresenta excelente domínio do texto dissertativo-argumentativo."},
-            {"competencia": "Selecionar, relacionar, organizar e interpretar informações em defesa de um ponto de vista", "nota": "150", "motivo": "Nível 4 - Apresenta informações, fatos e opiniões relacionados ao tema, de forma organizada, com indícios de autoria, em defesa de um ponto de vista."},
-            {"competencia": "Conhecimento dos mecanismos linguísticos necessários para a construção da argumentação", "nota": "200", "motivo": "Nível 5 - Articula bem as partes do texto e apresenta repertório diversificado de recursos coesivos."},
-            {"competencia": "Proposta de intervenção com respeito aos direitos humanos", "nota": "150", "motivo": "Nível 4 - Elabora bem proposta de intervenção relacionada ao tema e articulada à discussão desenvolvida no texto."}
+            {"competencia": "Domínio da modalidade escrita formal", "nota": "150"},
+            {"competencia": "Compreender a proposta e aplicar conceitos das várias áreas de conhecimento para desenvolver o texto dissertativo-argumentativo em prosa", "nota": "200" },
+            {"competencia": "Selecionar, relacionar, organizar e interpretar informações em defesa de um ponto de vista", "nota": "150"},
+            {"competencia": "Conhecimento dos mecanismos linguísticos necessários para a construção da argumentação", "nota": "200"},
+            {"competencia": "Proposta de intervenção com respeito aos direitos humanos", "nota": "150"}
         ],
         "contexto_tema": "A possível privatização do saneamento básico tem levantado uma série de discussões que se mostram contra e a favor. Apesar de ter como ideia fundamental levar água tratada aos que não possuem acesso, tendo em vista a falta de investimento público, por exemplo, muitos se mostram contra argumentando que essa estratégia vai dificultar ainda mais o acesso a esse serviço. Tendo isso em vista, a proposta do Banco de Redações do mês de agosto é que você desenvolva uma redação sobre o seguinte tema: Privatização do saneamento básico"
     }])
 
     resultado = avaliar_redacao(json_input_example)
+
+    # Após texto gerado pelo LLM como comentários/sugestão:
+    if not redacao.get("cometarios", "").strip():
+        redacao["cometarios"] = resultado  # Substitui VAZIO pelo conteúdo gerado
+    else:
+        redacao["cometarios"] += "\n\n" + resultado   # Para manter o comentário existente e adicionar novo comentário do ITS
+
+
+    print(resultado)
     print(resultado)
