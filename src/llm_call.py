@@ -16,22 +16,12 @@ def avaliar_redacao(json_input: str) -> str:
     # Obtém dados do dicionário da redação
     tema = redacao["tema"]
     texto = redacao["texto"]
-    competencias_ = redacao["competencias"]  # Renomeado para evitar conflito
-
-    # Processar as competências em uma lista de dicionários
-    competencias_lista = []
-    for item in competencias_:
-        competencia_info = {
-            "competencia": item["competencia"],
-            "nota": item["nota"],
-            "motivo": item["motivo"]
-        }
-        competencias_lista.append(competencia_info)
+    competencias_dados = redacao["competencias"] 
 
     # Monta o system prompt com as competências
     competencias_str = "\n".join([
         f"- **{comp['competencia']}**: Nota {comp['nota']} | Motivo: {comp['motivo']}"
-        for comp in competencias_lista
+        for comp in competencias_dados
     ])
 
     # Monta o system prompt
@@ -77,5 +67,27 @@ def avaliar_redacao(json_input: str) -> str:
 
     return response["message"]["content"]
     
+
+# Exemplo de uso
+if __name__ == "__main__":
+    json_input_example = json.dumps([{
+        "tema": "Privatização do saneamento básico",
+        "texto": "Hegel discorre sobre a importância de um pensamento bilateral para a formação da consciência dos indivíduos, que consiste em estar no mundo e ver o mundo por completo. Destarte, tal direito constitucional converte a ser pouco igualitário e torna-se um reflexo da sociedade contemporânea, na qual as relações de lucro e interesse predominam.Portanto, cabe ao Poder Executivo promover uma reestruturação nos complexos sanitários mediante a correta distribuição de capital público. Assim, o poder não deixar de emanar sobre o povo e o pensamento de Hegel tornar-se-à uma realidade para essa geração e futuras.",
+        "texto_comentado": "()Hegel discorre sobre a importância de um pensamento bilateral para a formação da consciência dos indivíduos, que consiste em estar no mundo e ver o mundo por completo. Destarte, tal direito constitucional converte a ser pouco igualitário e torna-se um reflexo da sociedade contemporânea, na qual as relações de lucro e interesse predominam.(Explore mais os argumentos)(Boa estratégia coesiva)Portanto, cabe ao Poder Executivo (Boa. Apresenta o agente e faz o detalhamento)promover uma reestruturação nos complexos sanitários mediante a correta distribuição de capital público. Assim, o poder não deixar de emanar sobre o povo e o pensamento de Hegel tornar-se-à uma realidade para essa geração e futuras.(A proposta está incompleta)",
+        "comentarios": "Ótima produção textual. Mantenha os aspectos positivos. Não deixe de exercitar a sua escrita.",
+        "nota": "850.0",
+        "titulo": "\"...\"",
+        "id": "16178",
+        "link": "https://vestibular.brasilescola.uol.com.br/banco-de-redacoes/16178",
+        "competencias": [
+            {"competencia": "Domínio da modalidade escrita formal", "nota": "150", "motivo": "Nível 4 - Demonstra bom domínio da modalidade escrita formal da língua portuguesa e de escolha de registro, com poucos desvios gramaticais e de convenções da escrita."},
+            {"competencia": "Compreender a proposta e aplicar conceitos das várias áreas de conhecimento para desenvolver o texto dissertativo-argumentativo em prosa", "nota": "200", "motivo": "Nível 5 - Desenvolve o tema por meio de argumentação consistente, a partir de um repertório sociocultural produtivo e apresenta excelente domínio do texto dissertativo-argumentativo."},
+            {"competencia": "Selecionar, relacionar, organizar e interpretar informações em defesa de um ponto de vista", "nota": "150", "motivo": "Nível 4 - Apresenta informações, fatos e opiniões relacionados ao tema, de forma organizada, com indícios de autoria, em defesa de um ponto de vista."},
+            {"competencia": "Conhecimento dos mecanismos linguísticos necessários para a construção da argumentação", "nota": "200", "motivo": "Nível 5 - Articula bem as partes do texto e apresenta repertório diversificado de recursos coesivos."},
+            {"competencia": "Proposta de intervenção com respeito aos direitos humanos", "nota": "150", "motivo": "Nível 4 - Elabora bem proposta de intervenção relacionada ao tema e articulada à discussão desenvolvida no texto."}
+        ],
+        "contexto_tema": "A possível privatização do saneamento básico tem levantado uma série de discussões que se mostram contra e a favor. Apesar de ter como ideia fundamental levar água tratada aos que não possuem acesso, tendo em vista a falta de investimento público, por exemplo, muitos se mostram contra argumentando que essa estratégia vai dificultar ainda mais o acesso a esse serviço. Tendo isso em vista, a proposta do Banco de Redações do mês de agosto é que você desenvolva uma redação sobre o seguinte tema: Privatização do saneamento básico"
+    }])
+
     resultado = avaliar_redacao(json_input_example)
     print(resultado)
