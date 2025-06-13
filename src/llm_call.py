@@ -8,15 +8,12 @@ def avaliar_redacao(json_input: str) -> str:
     """
     # Parse JSON
     data = json.loads(json_input)
-    redacao = data 
-
-    # Acessa o primeiro elemento (dicionário) da lista # por enquanto (acima), acessa direto às chaves como se o JSON fossem um único dicionário, só que é uma lista de dicionários (modificar depois)
-    #redacao = data[0] 
+    redacao = data[0]
 
     # Obtém dados do dicionário da redação
     tema = redacao["tema"]
     texto = redacao["texto"]
-    competencias_dados = redacao["competencias"] 
+    competencias_dados = redacao["competencias"]
 
     # Monta o system prompt com as competências
     competencias_str = "\n".join([
@@ -36,11 +33,11 @@ def avaliar_redacao(json_input: str) -> str:
         f"**Competências Avaliadas:**\n{competencias_str}\n\n"
         "Apresente sua resposta no seguinte formato:\n\n"
         "**Sugestões de Melhoria (uma por competência):**\n"
-        "1. **Competência [V]** (Nota: [nota]): [Sugestão concisa]\n"
-        "2. **Competência [W]** (Nota: [nota]): [Sugestão concisa]\n"
-        "3. **Competência [XX]** (Nota: [nota]): [Sugestão concisa]\n"
-        "4. **Competência [Y]** (Nota: [nota]): [Sugestão concisa]\n"
-        "5. **Competência [Z]** (Nota: [nota]): [Sugestão concisa]\n\n"
+        "**Competência 1** (Nota: [nota]): [Sugestão concisa]\n"
+        "**Competência 2** (Nota: [nota]): [Sugestão concisa]\n"
+        "**Competência 3** (Nota: [nota]): [Sugestão concisa]\n"
+        "**Competência 4** (Nota: [nota]): [Sugestão concisa]\n"
+        "**Competência 5** (Nota: [nota]): [Sugestão concisa]\n\n"
         "Guie-se pelas notas fornecidas e pelo conteúdo do texto para cada sugestão."
         "[Para cada competência, gere até 3 sugestões focadas nessa competência, levando em conta o conteúdo da redação, o escopo do tema e a nota recebida]\n"
         "---\n\n"
@@ -71,30 +68,39 @@ def avaliar_redacao(json_input: str) -> str:
     )
 
     return response["message"]["content"]
-    
+
 
 # Exemplo de uso
-if __name__ == "__main__":
-    json_input_example = json.dumps([{
-        "tema": "Privatização do saneamento básico",
-        "texto": "Hegel discorre sobre a importância de um pensamento bilateral para a formação da consciência dos indivíduos, que consiste em estar no mundo e ver o mundo por completo. Destarte, tal direito constitucional converte a ser pouco igualitário e torna-se um reflexo da sociedade contemporânea, na qual as relações de lucro e interesse predominam.Portanto, cabe ao Poder Executivo promover uma reestruturação nos complexos sanitários mediante a correta distribuição de capital público. Assim, o poder não deixar de emanar sobre o povo e o pensamento de Hegel tornar-se-à uma realidade para essa geração e futuras.",
-        "texto_comentado": "()Hegel discorre sobre a importância de um pensamento bilateral para a formação da consciência dos indivíduos, que consiste em estar no mundo e ver o mundo por completo. Destarte, tal direito constitucional converte a ser pouco igualitário e torna-se um reflexo da sociedade contemporânea, na qual as relações de lucro e interesse predominam.(Explore mais os argumentos)(Boa estratégia coesiva)Portanto, cabe ao Poder Executivo (Boa. Apresenta o agente e faz o detalhamento)promover uma reestruturação nos complexos sanitários mediante a correta distribuição de capital público. Assim, o poder não deixar de emanar sobre o povo e o pensamento de Hegel tornar-se-à uma realidade para essa geração e futuras.(A proposta está incompleta)",
-        "comentarios": "Ótima produção textual. Mantenha os aspectos positivos. Não deixe de exercitar a sua escrita.",
-        "nota": "850.0",
-        "titulo": "\"...\"",
-        "id": "16178",
-        "link": "https://vestibular.brasilescola.uol.com.br/banco-de-redacoes/16178",
-        "competencias": [
-            {"competencia": "Domínio da modalidade escrita formal", "nota": "150"},
-            {"competencia": "Compreender a proposta e aplicar conceitos das várias áreas de conhecimento para desenvolver o texto dissertativo-argumentativo em prosa", "nota": "200" },
-            {"competencia": "Selecionar, relacionar, organizar e interpretar informações em defesa de um ponto de vista", "nota": "150"},
-            {"competencia": "Conhecimento dos mecanismos linguísticos necessários para a construção da argumentação", "nota": "200"},
-            {"competencia": "Proposta de intervenção com respeito aos direitos humanos", "nota": "150"}
-        ],
-        "contexto_tema": "A possível privatização do saneamento básico tem levantado uma série de discussões que se mostram contra e a favor. Apesar de ter como ideia fundamental levar água tratada aos que não possuem acesso, tendo em vista a falta de investimento público, por exemplo, muitos se mostram contra argumentando que essa estratégia vai dificultar ainda mais o acesso a esse serviço. Tendo isso em vista, a proposta do Banco de Redações do mês de agosto é que você desenvolva uma redação sobre o seguinte tema: Privatização do saneamento básico"
-    }])
 
-    resultado = avaliar_redacao(json_input_example)
+if __name__ == "__main__":
+    try:
+        # Lê o arquivo JSON
+        with open("tema-34.json", "r", encoding="utf-8") as file:
+            data = json.load(file)  # Carrega o conteúdo como um objeto Python
+
+        # Converte o objeto Python de volta para string JSON (requisito da função)
+            json_input = json.dumps(data)
+
+        # Chama a função para avaliar a redação
+            resultado = avaliar_redacao(json_input)
+
+        # Atualiza o campo "cometarios"
+            redacao = data[0]
+            if not redacao.get("cometarios", "").strip():
+                redacao["cometarios"] = resultado
+            else:
+                redacao["cometarios"] += "\n\n" + resultado
+
+
+        # Imprime o resultado final
+            print(json.dumps(redacao, indent=4, ensure_ascii=False))  # Exibe o JSON formatado
+
+    except FileNotFoundError:
+        print("Erro: O arquivo não foi encontrado.")
+    except json.JSONDecodeError:
+        print("Erro: O conteúdo do arquivo não é um JSON válido.")
+
+    resultado = avaliar_redacao(json_input)
 
     # Após texto gerado pelo LLM como comentários/sugestão:
     if not redacao.get("cometarios", "").strip():
@@ -103,5 +109,4 @@ if __name__ == "__main__":
         redacao["cometarios"] += "\n\n" + resultado   # Para manter o comentário existente e adicionar novo comentário do ITS
 
 
-    print(resultado)
     print(resultado)
