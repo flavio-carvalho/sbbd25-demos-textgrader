@@ -1,5 +1,6 @@
 import json
 import ollama
+import sys
 
 def avaliar_redacao(json_input: str) -> str:
     """
@@ -70,13 +71,19 @@ def avaliar_redacao(json_input: str) -> str:
     return response["message"]["content"]
 
 
-# Exemplo de uso
+## __main__
 
 if __name__ == "__main__":
     try:
+        # Obtém o nome do arquivo via argumento ou entrada do usuário
+        if len(sys.argv) > 1:
+            filename = sys.argv[1]
+        else:
+            filename = input("Digite o nome do arquivo JSON a ser processado: ")
+
         # Lê o arquivo JSON
-        with open("tema-34.json", "r", encoding="utf-8") as file:
-            data = json.load(file)  # Carrega o conteúdo como um objeto Python
+        with open(filename, "r", encoding="utf-8") as file:
+            data = json.load(file)
 
         # Converte o objeto Python de volta para string JSON (requisito da função)
             json_input = json.dumps(data)
@@ -96,9 +103,11 @@ if __name__ == "__main__":
             print(json.dumps(redacao, indent=4, ensure_ascii=False))  # Exibe o JSON formatado
 
     except FileNotFoundError:
-        print("Erro: O arquivo não foi encontrado.")
+        print(f"Erro: O arquivo '{filename}' não foi encontrado. [[1]]")
     except json.JSONDecodeError:
-        print("Erro: O conteúdo do arquivo não é um JSON válido.")
+        print(f"Erro: O conteúdo do arquivo '{filename}' não é um JSON válido. [[1]]")
+    except Exception as e:
+        print(f"Ocorreu um erro inesperado: {str(e)}. [[2]]")
 
     resultado = avaliar_redacao(json_input)
 
