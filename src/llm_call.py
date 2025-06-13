@@ -72,7 +72,6 @@ def avaliar_redacao(json_input: str) -> str:
 
 
 ## __main__
-
 if __name__ == "__main__":
     try:
         # Obtém o nome do arquivo via argumento ou entrada do usuário
@@ -85,37 +84,49 @@ if __name__ == "__main__":
         with open(filename, "r", encoding="utf-8") as file:
             data = json.load(file)
 
-        # Converte o objeto Python de volta para string JSON (requisito da função)
-            json_input = json.dumps(data)
+        # Mostra opção de escolha da redação
+        num_redacoes = len(data)
+        if num_redacoes == 0:
+            raise ValueError("O arquivo não contém redações válidas.")
 
-        # Chama a função para avaliar a redação
-            resultado = avaliar_redacao(json_input)
+        print(f"Existem {num_redacoes} redações no arquivo. Escolha um número entre 1 e {num_redacoes}:")
+
+        while True:
+            try:
+                escolha = int(input("Número da redação: "))
+                if 1 <= escolha <= num_redacoes:
+                    redacao_index = escolha - 1
+                    break
+                else:
+                    print("Número inválido. Tente novamente.")
+            except ValueError:
+                print("Digite um número válido.")
+
+        # Seleciona a redação escolhida
+        redacao = data[redacao_index]
+
+        # Processa a redação escolhida
+        json_input = json.dumps([redacao])  # Passa apenas a redação selecionada
+        resultado = avaliar_redacao(json_input)
 
         # Atualiza o campo "cometarios"
-            redacao = data[0]
-            if not redacao.get("cometarios", "").strip():
-                redacao["cometarios"] = resultado
-            else:
-                redacao["cometarios"] += "\n\n" + resultado
+        if not redacao.get("cometarios", "").strip():
+            redacao["cometarios"] = resultado
+        else:
+            redacao["cometarios"] += "\n\n" + resultado
 
-
-        # Imprime o resultado final
-            print(json.dumps(redacao, indent=4, ensure_ascii=False))  # Exibe o JSON formatado
+        # Exibe o resultado final
+        print("Resultado da avaliação:")
+        print(json.dumps(redacao, indent=4, ensure_ascii=False))
 
     except FileNotFoundError:
         print(f"Erro: O arquivo '{filename}' não foi encontrado. [[1]]")
     except json.JSONDecodeError:
         print(f"Erro: O conteúdo do arquivo '{filename}' não é um JSON válido. [[1]]")
+    except ValueError as e:
+        print(f"Erro: {str(e)}. [[2]]")
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {str(e)}. [[2]]")
-
-    resultado = avaliar_redacao(json_input)
-
-    # Após texto gerado pelo LLM como comentários/sugestão:
-    if not redacao.get("cometarios", "").strip():
-        redacao["cometarios"] = resultado  # Substitui VAZIO pelo conteúdo gerado
-    else:
-        redacao["cometarios"] += "\n\n" + resultado   # Para manter o comentário existente e adicionar novo comentário do ITS
-
+        print(f"Erro inesperado: {str(e)}. [[2]]")
 
     print(resultado)
+
